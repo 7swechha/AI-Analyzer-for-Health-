@@ -1,0 +1,1337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FUME — Client Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAFAF8;
+    --bg-panel: #FFFFFF;
+    --bg-sunken: #F2F1ED;
+    --ink: #1B1F2A;
+    --ink-dim: #5C6270;
+    --ink-faint: #9498A3;
+    --line: #E6E4DD;
+    --brand: #3B4A6B;       /* clinical indigo */
+    --brand-ink: #29344D;
+    --brand-soft: #E8EBF2;
+    --sage: #6E8F72;        /* confirmed / good */
+    --sage-soft: #EAF1EA;
+    --amber: #B4813E;       /* caution / inference */
+    --amber-soft: #F5EBDA;
+    --rose: #A8495B;        /* risk / concern */
+    --rose-soft: #F5E4E7;
+    --slate: #7C8090;       /* missing info */
+    --slate-soft: #EDEDF0;
+    --radius: 14px;
+    --shadow-sm: 0 1px 2px rgba(27,31,42,0.06), 0 1px 1px rgba(27,31,42,0.04);
+    --shadow-md: 0 6px 20px -6px rgba(27,31,42,0.14), 0 2px 6px rgba(27,31,42,0.06);
+    --shadow-lg: 0 20px 50px -12px rgba(27,31,42,0.22);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  ::selection{background:var(--brand-soft);}
+  .hidden{display:none !important;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  /* ---------- shared ---------- */
+  .card{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-sm);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 20px;border-radius:10px;font-weight:600;font-size:14px;
+    border:1px solid transparent; transition:.15s ease; white-space:nowrap;
+  }
+  .btn-primary{background:var(--brand);color:#fff;}
+  .btn-primary:hover{background:var(--brand-ink);}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--brand);color:var(--brand);}
+  .btn-sm{padding:7px 12px;font-size:12.5px;border-radius:8px;}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
+    padding:4px 9px;border-radius:99px;letter-spacing:.01em;
+  }
+  .badge-confirmed{background:var(--sage-soft);color:var(--sage);}
+  .badge-reported{background:var(--brand-soft);color:var(--brand);}
+  .badge-inference{background:var(--amber-soft);color:var(--amber);}
+  .badge-missing{background:var(--slate-soft);color:var(--slate);}
+  .badge-risk-high{background:var(--rose-soft);color:var(--rose);}
+  .badge-risk-medium{background:var(--amber-soft);color:var(--amber);}
+  .badge-risk-low{background:var(--sage-soft);color:var(--sage);}
+  .dot{width:6px;height:6px;border-radius:99px;background:currentColor;}
+  .evidence{
+    border-left:3px solid var(--line);
+    background:var(--bg-sunken);
+    padding:9px 12px;border-radius:0 8px 8px 0;
+    font-family:'IBM Plex Mono',monospace;font-size:12.3px;line-height:1.55;color:var(--ink-dim);
+  }
+  .evidence.confirmed{border-color:var(--sage);}
+  .evidence.reported{border-color:var(--brand);}
+  .evidence.inference{border-color:var(--amber);}
+  .fade-in{animation:fadeIn .5s ease both;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .progress-track{height:6px;border-radius:99px;background:var(--bg-sunken);overflow:hidden;}
+  .progress-fill{height:100%;border-radius:99px;background:var(--brand);transition:width .6s ease;}
+
+  /* ---------- landing ---------- */
+  #view-landing{min-height:100vh;background:
+    radial-gradient(1100px 500px at 15% -10%, #EEF1F8 0%, transparent 60%),
+    radial-gradient(900px 500px at 100% 10%, #EAF1EA 0%, transparent 55%),
+    var(--bg);}
+  .nav-wrap{max-width:1180px;margin:0 auto;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:18px;letter-spacing:-.01em;}
+  .logo-mark{width:30px;height:30px;border-radius:8px;background:var(--brand);position:relative;flex-shrink:0;}
+  .logo-mark:after{content:"";position:absolute;inset:8px;border-radius:3px;background:#fff;opacity:.85;}
+  .hero{max-width:1180px;margin:0 auto;padding:64px 32px 40px;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;}
+  @media(max-width:920px){.hero{grid-template-columns:1fr;padding-top:24px;}}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--brand);
+    background:var(--brand-soft);padding:6px 12px;border-radius:99px;margin-bottom:22px;}
+  .hero h1{font-size:52px;line-height:1.06;letter-spacing:-.02em;font-weight:600;margin:0 0 22px;}
+  @media(max-width:640px){.hero h1{font-size:36px;}}
+  .hero p.sub{font-size:18px;color:var(--ink-dim);line-height:1.6;margin:0 0 32px;max-width:520px;}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px;}
+  .trust-row{display:flex;gap:28px;flex-wrap:wrap;padding-top:24px;border-top:1px solid var(--line);}
+  .trust-item{font-size:13px;color:var(--ink-faint);display:flex;align-items:center;gap:7px;}
+  .hero-visual{position:relative;}
+  .float-card{position:absolute;background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-md);padding:14px 16px;}
+  .stat-strip{max-width:1180px;margin:20px auto 0;padding:0 32px 90px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  @media(max-width:760px){.stat-strip{grid-template-columns:repeat(2,1fr);}}
+  .stat-box{padding:22px;border-radius:12px;background:var(--bg-panel);border:1px solid var(--line);}
+  .stat-box .num{font-family:'Fraunces',serif;font-size:28px;font-weight:600;}
+  .stat-box .lbl{font-size:12.5px;color:var(--ink-faint);margin-top:4px;}
+  .section{max-width:1180px;margin:0 auto;padding:70px 32px;}
+  .flow-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-top:36px;}
+  @media(max-width:900px){.flow-grid{grid-template-columns:repeat(2,1fr);gap:16px;}}
+  .flow-step{padding:18px 14px;position:relative;text-align:left;}
+  .flow-step .k{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--brand);margin-bottom:10px;}
+  .flow-step .t{font-weight:600;font-size:13.5px;}
+  .flow-arrow{position:absolute;right:-2px;top:26px;color:var(--ink-faint);font-size:14px;}
+  @media(max-width:900px){.flow-arrow{display:none;}}
+
+  /* ---------- upload ---------- */
+  #view-upload{min-height:100vh;background:var(--bg);}
+  .upload-shell{max-width:840px;margin:0 auto;padding:48px 28px 100px;}
+  .dropzone{
+    border:1.5px dashed var(--line);border-radius:16px;background:var(--bg-panel);
+    padding:46px 24px;text-align:center;transition:.15s;cursor:pointer;
+  }
+  .dropzone.drag{border-color:var(--brand);background:var(--brand-soft);}
+  .source-tabs{display:flex;gap:6px;background:var(--bg-sunken);padding:4px;border-radius:11px;margin-bottom:22px;width:fit-content;}
+  .source-tab{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink-dim);}
+  .source-tab.active{background:var(--bg-panel);color:var(--ink);box-shadow:var(--shadow-sm);}
+  #pasteArea{width:100%;min-height:260px;border:1px solid var(--line);border-radius:12px;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.6;resize:vertical;background:var(--bg-panel);}
+  #pasteArea:focus{outline:none;border-color:var(--brand);}
+
+  /* ---------- analyzing ---------- */
+  #view-analyzing{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+  .analyze-box{width:440px;max-width:90vw;text-align:center;}
+  .pulse-ring{width:74px;height:74px;border-radius:50%;border:3px solid var(--brand-soft);border-top-color:var(--brand);margin:0 auto 30px;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .think-line{font-size:13.5px;color:var(--ink-dim);margin-bottom:8px;opacity:0;transform:translateY(4px);transition:.4s;}
+  .think-line.show{opacity:1;transform:translateY(0);}
+  .think-line.done{color:var(--sage);}
+
+  /* ---------- app shell ---------- */
+  #view-app{display:none;min-height:100vh;}
+  .app-shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh;}
+  @media(max-width:860px){.app-shell{grid-template-columns:1fr;}}
+  .sidebar{background:var(--bg-panel);border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto;}
+  @media(max-width:860px){.sidebar{display:none;}}
+  .side-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-dim);margin-bottom:2px;}
+  .side-link.active{background:var(--brand-soft);color:var(--brand);}
+  .side-link:hover:not(.active){background:var(--bg-sunken);color:var(--ink);}
+  .side-sec-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);padding:16px 12px 6px;font-weight:700;}
+  .topbar{position:sticky;top:0;background:rgba(250,250,248,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;z-index:20;}
+  .main-scroll{padding:26px 28px 100px;max-width:1280px;}
+  .tabpanel{display:none;}
+  .tabpanel.active{display:block;}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px;}
+  @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:640px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+  .kpi-card{padding:18px;}
+  .kpi-card .lbl{font-size:11.5px;color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+  .kpi-card .val{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin-top:6px;}
+  .kpi-card .sub{font-size:12px;margin-top:4px;color:var(--ink-dim);}
+
+  .module-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:1000px){.module-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:640px){.module-grid{grid-template-columns:1fr;}}
+  .module-card{padding:17px;display:flex;flex-direction:column;gap:10px;}
+  .module-head{display:flex;align-items:center;justify-content:space-between;}
+  .module-title{font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;}
+  .conf-bar{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink-faint);}
+  .conf-track{width:52px;height:4px;border-radius:99px;background:var(--bg-sunken);overflow:hidden;}
+  .conf-fill{height:100%;background:var(--brand);}
+
+  .timeline{display:flex;flex-direction:column;gap:2px;}
+  .tl-row{display:grid;grid-template-columns:90px 1fr;gap:14px;padding:12px 4px;border-bottom:1px solid var(--line);}
+  .tl-row:last-child{border-bottom:none;}
+  .tl-day{font-weight:700;font-size:12.5px;color:var(--ink-dim);padding-top:2px;}
+  .tl-events{display:flex;flex-direction:column;gap:6px;}
+  .tl-event{display:flex;align-items:flex-start;gap:8px;font-size:13px;}
+  .tl-tag{flex-shrink:0;margin-top:5px;}
+
+  .chat-fab{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:50%;background:var(--brand);color:#fff;
+    display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);border:none;z-index:50;font-size:22px;}
+  .chat-panel{position:fixed;right:24px;bottom:92px;width:360px;max-width:90vw;height:480px;max-height:70vh;background:var(--bg-panel);
+    border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);display:none;flex-direction:column;overflow:hidden;z-index:50;}
+  .chat-panel.open{display:flex;}
+  .chat-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .chat-body{flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+  .chat-msg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;}
+  .chat-msg.bot{background:var(--bg-sunken);align-self:flex-start;border-bottom-left-radius:3px;}
+  .chat-msg.user{background:var(--brand);color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
+  .chat-suggest{font-size:11.5px;padding:6px 10px;border:1px solid var(--line);border-radius:99px;color:var(--ink-dim);background:var(--bg-panel);}
+  .chat-suggest:hover{border-color:var(--brand);color:var(--brand);}
+  .chat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);}
+  .chat-input-row input{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:13px;}
+  .chat-input-row input:focus{outline:none;border-color:var(--brand);}
+
+  .review-item{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+  .review-status{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;}
+  .status-pending{background:var(--slate-soft);color:var(--slate);}
+  .status-approved{background:var(--sage-soft);color:var(--sage);}
+  .status-edited{background:var(--brand-soft);color:var(--brand);}
+  .status-rejected{background:var(--rose-soft);color:var(--rose);}
+
+  table.data-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.data-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);padding:8px 12px;border-bottom:1px solid var(--line);}
+  table.data-table td{padding:12px;border-bottom:1px solid var(--line);}
+  table.data-table tr:last-child td{border-bottom:none;}
+  table.data-table tr:hover td{background:var(--bg-sunken);}
+
+  .safety-metric{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);}
+  .safety-metric:last-child{border-bottom:none;}
+
+  input[type=text], textarea, select{font-family:inherit;}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ LANDING ============================================================ -->
+<div id="view-landing">
+  <div class="nav-wrap">
+    <div class="logo"><div class="logo-mark"></div>FUME</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-ghost btn-sm" onclick="goto('upload')">Sign in</button>
+      <button class="btn btn-primary btn-sm" onclick="goto('upload')">Get started</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="fade-in">
+      <div class="eyebrow"><span class="dot"></span> Client Intelligence Platform</div>
+      <h1 class="display">Transform client conversations into actionable health intelligence</h1>
+      <p class="sub">Evidence-grounded AI insights with human review — designed for health coaches who need to understand every client, every week, without reading every message.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="goto('upload')">Analyze Conversation →</button>
+        <button class="btn btn-ghost" onclick="loadDemo()">View Demo</button>
+      </div>
+      <div class="trust-row">
+        <div class="trust-item"><span class="dot" style="color:var(--sage)"></span> Every claim shows its source</div>
+        <div class="trust-item"><span class="dot" style="color:var(--brand)"></span> Human review on every insight</div>
+        <div class="trust-item"><span class="dot" style="color:var(--amber)"></span> No hidden inference</div>
+      </div>
+    </div>
+    <div class="hero-visual fade-in" style="animation-delay:.1s">
+      <div class="card" style="padding:20px;border-radius:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="font-weight:700;font-size:13.5px;">Sarah M. — Week 12</div>
+          <span class="badge badge-inference">AI Confidence 87%</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div style="background:var(--bg-sunken);border-radius:10px;padding:12px;">
+            <div style="font-size:11px;color:var(--ink-faint);font-weight:600;">SLEEP</div>
+            <div style="font-weight:700;color:var(--rose);margin-top:2px;">Poor</div>
+          </div>
+          <div style="background:var(--bg-sunken);border-radius:10px;padding:12px;">
+            <div style="font-size:11px;color:var(--ink-faint);font-weight:600;">HYDRATION</div>
+            <div style="font-weight:700;color:var(--amber);margin-top:2px;">Low</div>
+          </div>
+        </div>
+        <div class="evidence reported">"I slept only around five hours, work's been crazy."</div>
+      </div>
+      <div class="float-card" style="top:-18px;right:-14px;">
+        <div style="font-size:11px;color:var(--ink-faint);font-weight:600;">RISK</div>
+        <div style="font-weight:700;font-size:14px;color:var(--rose);">Burnout — Medium</div>
+      </div>
+      <div class="float-card" style="bottom:-16px;left:-18px;">
+        <div style="font-size:11px;color:var(--ink-faint);font-weight:600;">EVIDENCE COVERAGE</div>
+        <div style="font-weight:700;font-size:14px;">94%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat-box"><div class="num">12 min</div><div class="lbl">Saved per client review</div></div>
+    <div class="stat-box"><div class="num">100%</div><div class="lbl">Insights traced to source</div></div>
+    <div class="stat-box"><div class="num">9</div><div class="lbl">Health modules tracked</div></div>
+    <div class="stat-box"><div class="num">0</div><div class="lbl">Unsupported claims</div></div>
+  </div>
+
+  <div class="section" style="padding-top:0;">
+    <h2 class="display" style="font-size:26px;margin:0 0 6px;">From raw chat to reviewable intelligence</h2>
+    <p style="color:var(--ink-dim);margin:0;">Six steps. Every one auditable.</p>
+    <div class="flow-grid card" style="border-radius:16px;">
+      <div class="flow-step"><div class="k">01</div><div class="t">Upload conversation</div><div class="flow-arrow">→</div></div>
+      <div class="flow-step"><div class="k">02</div><div class="t">AI analysis</div><div class="flow-arrow">→</div></div>
+      <div class="flow-step"><div class="k">03</div><div class="t">Client dashboard</div><div class="flow-arrow">→</div></div>
+      <div class="flow-step"><div class="k">04</div><div class="t">Coach reviews</div><div class="flow-arrow">→</div></div>
+      <div class="flow-step"><div class="k">05</div><div class="t">Draft follow-up</div><div class="flow-arrow">→</div></div>
+      <div class="flow-step"><div class="k">06</div><div class="t">Export</div></div>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top:0;text-align:center;">
+    <button class="btn btn-primary" style="padding:14px 30px;font-size:15px;" onclick="goto('upload')">Analyze a conversation →</button>
+  </div>
+</div>
+
+<!-- ============================================================ UPLOAD ============================================================ -->
+<div id="view-upload" style="display:none;">
+  <div class="upload-shell">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:26px;">
+      <div class="logo-mark" style="width:24px;height:24px;"></div>
+      <span style="font-weight:700;">FUME</span>
+      <span style="color:var(--ink-faint);font-size:13px;margin-left:8px;">/ New conversation</span>
+    </div>
+    <h2 class="display" style="font-size:28px;margin:0 0 8px;">Upload a client conversation</h2>
+    <p style="color:var(--ink-dim);margin:0 0 26px;">Paste text or upload a file. FUME analyzes whatever you give it — nothing is pre-scripted.</p>
+
+    <div class="source-tabs">
+      <div class="source-tab active" id="tab-paste" onclick="switchSource('paste')">Paste text</div>
+      <div class="source-tab" id="tab-file" onclick="switchSource('file')">Upload file</div>
+    </div>
+
+    <div id="pane-paste">
+      <textarea id="pasteArea" placeholder="Paste a WhatsApp export, SMS thread, or any coach↔client conversation here...
+
+Example format:
+[10/6, 08:12] Sarah: Morning! Only slept about 5 hours again, work has been nuts
+[10/6, 08:14] Coach: Sorry to hear that — how are you feeling today?
+[10/6, 08:15] Sarah: Tired but okay. Skipped breakfast, just had coffee
+..."></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <span id="charCount" style="font-size:12px;color:var(--ink-faint);">0 characters</span>
+        <button class="btn btn-ghost btn-sm" onclick="fillSample()">Use sample conversation</button>
+      </div>
+    </div>
+
+    <div id="pane-file" class="hidden">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <div style="font-size:32px;margin-bottom:10px;">📄</div>
+        <div style="font-weight:600;margin-bottom:4px;">Drag & drop a file, or click to browse</div>
+        <div style="font-size:12.5px;color:var(--ink-faint);">Supports .txt, .csv, and WhatsApp .txt exports. (PDF/DOCX: paste extracted text for best results.)</div>
+        <input type="file" id="fileInput" accept=".txt,.csv" class="hidden" onchange="handleFile(event)">
+      </div>
+    </div>
+
+    <div id="previewBox" class="hidden card" style="padding:16px;margin-top:18px;">
+      <div style="font-size:12px;font-weight:700;color:var(--ink-faint);margin-bottom:8px;">CONVERSATION PREVIEW</div>
+      <div id="previewText" class="mono" style="font-size:12.5px;color:var(--ink-dim);max-height:160px;overflow:auto;white-space:pre-wrap;line-height:1.6;"></div>
+    </div>
+
+    <div style="margin-top:26px;display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="goto('landing')">← Back</button>
+      <button class="btn btn-primary" style="flex:1;padding:14px;font-size:15px;" onclick="startAnalysis()">Analyze Conversation</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ ANALYZING ============================================================ -->
+<div id="view-analyzing" style="display:none;">
+  <div class="analyze-box">
+    <div class="pulse-ring"></div>
+    <h3 class="display" style="font-size:20px;margin:0 0 20px;">Analyzing conversation…</h3>
+    <div id="thinkLines" style="text-align:left;"></div>
+  </div>
+</div>
+
+<!-- ============================================================ APP ============================================================ -->
+<div id="view-app">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="logo" style="margin-bottom:22px;padding-left:6px;"><div class="logo-mark"></div>FUME</div>
+      <div class="side-sec-lbl">Client</div>
+      <div class="side-link active" data-tab="dashboard" onclick="switchTab('dashboard')">◆ Dashboard</div>
+      <div class="side-link" data-tab="analytics" onclick="switchTab('analytics')">◆ Progress</div>
+      <div class="side-link" data-tab="review" onclick="switchTab('review')">◆ Human Review</div>
+      <div class="side-link" data-tab="safety" onclick="switchTab('safety')">◆ AI Safety</div>
+      <div class="side-sec-lbl">Workspace</div>
+      <div class="side-link" data-tab="clients" onclick="switchTab('clients')">◆ Clients</div>
+      <div class="side-link" data-tab="search" onclick="switchTab('search')">◆ Search</div>
+      <div class="side-sec-lbl">Actions</div>
+      <div class="side-link" onclick="goto('upload')">◆ New Conversation</div>
+    </div>
+
+    <div>
+      <div class="topbar">
+        <div>
+          <div style="font-weight:700;font-size:15px;" id="topClientName">Client</div>
+          <div style="font-size:11.5px;color:var(--ink-faint);" id="topClientMeta">Analyzed just now</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="exportJSON()">Export JSON</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyReport()">Copy Report</button>
+          <button class="btn btn-ghost btn-sm" onclick="window.print()">Download PDF</button>
+          <button class="btn btn-primary btn-sm" onclick="emailCoach()">Email Coach</button>
+        </div>
+      </div>
+
+      <div class="main-scroll">
+
+        <!-- DASHBOARD TAB -->
+        <div class="tabpanel active" id="tab-dashboard">
+          <div class="kpi-grid" id="kpiGrid"></div>
+
+          <div class="card fade-in" style="padding:22px;margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+              <h3 style="margin:0;font-size:16px;">AI Client Summary</h3>
+              <span class="badge badge-inference" id="summaryConfBadge">Confidence —</span>
+            </div>
+            <div id="summaryBody" style="font-size:13.8px;line-height:1.7;"></div>
+          </div>
+
+          <h3 style="font-size:15px;margin:26px 0 12px;">Health Modules</h3>
+          <div class="module-grid" id="moduleGrid"></div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px;" id="riskTimelineGrid">
+            <div class="card" style="padding:20px;">
+              <h3 style="font-size:15px;margin:0 0 14px;">Risk Panel</h3>
+              <div id="riskPanel"></div>
+            </div>
+            <div class="card" style="padding:20px;">
+              <h3 style="font-size:15px;margin:0 0 14px;">Weekly Timeline</h3>
+              <div class="timeline" id="timelineBox"></div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:22px;margin-top:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h3 style="margin:0;font-size:15px;">AI Draft Coach Response</h3>
+              <button class="btn btn-ghost btn-sm" onclick="regenDraft()">↻ Regenerate</button>
+            </div>
+            <textarea id="draftBox" style="width:100%;min-height:150px;border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13.5px;line-height:1.7;"></textarea>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button class="btn btn-primary btn-sm" onclick="approveDraft(event)">Approve</button>
+              <button class="btn btn-ghost btn-sm" onclick="copyDraft(event)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div class="tabpanel" id="tab-analytics">
+          <h2 class="display" style="font-size:22px;margin:0 0 4px;">Progress & Trends</h2>
+          <p style="color:var(--ink-dim);font-size:13px;margin:0 0 20px;">Simulated multi-week trend built from this week's analysis, for demonstration of longitudinal tracking.</p>
+          <div class="module-grid" id="trendGrid"></div>
+        </div>
+
+        <!-- REVIEW TAB -->
+        <div class="tabpanel" id="tab-review">
+          <h2 class="display" style="font-size:22px;margin:0 0 4px;">Human Review</h2>
+          <p style="color:var(--ink-dim);font-size:13px;margin:0 0 20px;">Every AI insight requires coach sign-off. Approve, edit, or reject — changes update the dashboard instantly.</p>
+          <div id="reviewList"></div>
+          <h3 style="font-size:14px;margin:26px 0 10px;">Audit Trail</h3>
+          <table class="data-table card"><thead><tr><th>Item</th><th>Action</th><th>By</th><th>Time</th></tr></thead>
+          <tbody id="auditBody"></tbody></table>
+        </div>
+
+        <!-- SAFETY TAB -->
+        <div class="tabpanel" id="tab-safety">
+          <h2 class="display" style="font-size:22px;margin:0 0 4px;">AI Safety Panel</h2>
+          <p style="color:var(--ink-dim);font-size:13px;margin:0 0 20px;">Transparency metrics for this analysis.</p>
+          <div class="card" style="padding:22px;" id="safetyBox"></div>
+        </div>
+
+        <!-- CLIENTS TAB -->
+        <div class="tabpanel" id="tab-clients">
+          <h2 class="display" style="font-size:22px;margin:0 0 4px;">Clients</h2>
+          <p style="color:var(--ink-dim);font-size:13px;margin:0 0 20px;">All coach clients with recent conversation analyses.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;">
+            <div class="card" style="padding:16px;"><div style="font-size:11.5px;color:var(--ink-faint);font-weight:600;">TOTAL CLIENTS</div><div class="display" style="font-size:24px;margin-top:4px;" id="statTotalClients">—</div></div>
+            <div class="card" style="padding:16px;"><div style="font-size:11.5px;color:var(--ink-faint);font-weight:600;">HIGH RISK</div><div class="display" style="font-size:24px;margin-top:4px;color:var(--rose);" id="statHighRisk">—</div></div>
+            <div class="card" style="padding:16px;"><div style="font-size:11.5px;color:var(--ink-faint);font-weight:600;">FOLLOW-UPS DUE</div><div class="display" style="font-size:24px;margin-top:4px;color:var(--amber);" id="statFollowups">—</div></div>
+          </div>
+          <table class="data-table card"><thead><tr><th>Client</th><th>Health Score</th><th>Risk</th><th>Last Conversation</th><th>Status</th></tr></thead>
+          <tbody id="clientsBody"></tbody></table>
+        </div>
+
+        <!-- SEARCH TAB -->
+        <div class="tabpanel" id="tab-search">
+          <h2 class="display" style="font-size:22px;margin:0 0 4px;">Search</h2>
+          <p style="color:var(--ink-dim);font-size:13px;margin:0 0 16px;">Search across the conversation, extracted evidence, symptoms, and recommendations for this client.</p>
+          <input type="text" id="searchInput" placeholder="Search evidence, symptoms, recommendations…" style="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;margin-bottom:18px;" oninput="runSearch()">
+          <div id="searchResults"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT ASSISTANT -->
+<button class="chat-fab" onclick="toggleChat()">💬</button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head">
+    <div style="font-weight:700;font-size:13.5px;">Coach AI</div>
+    <button onclick="toggleChat()" style="background:none;border:none;font-size:16px;color:var(--ink-faint);">✕</button>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px;" id="chatSuggests"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Ask about this client…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="btn btn-primary btn-sm" onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   FUME Client Intelligence Platform — MVP application logic
+   Vanilla JS. No build step. State lives in memory (no localStorage).
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------
+   0. GLOBAL STATE
+   --------------------------------------------------------------------- */
+const state = {
+  rawText: "",
+  analysis: null,      // full analysis object for current conversation
+  reviews: [],          // review items (approve/edit/reject)
+  audit: [],             // audit trail entries
+  chatLog: [],
+  clients: [],           // multi-client mock roster
+  draft: "",
+};
+
+const SAMPLE_CONVO = `[10/6, 07:58] Sarah: Morning! Only slept about 5 hours again, work has been nuts this week
+[10/6, 08:01] Coach: Sorry to hear that — how are you feeling today?
+[10/6, 08:03] Sarah: Tired but okay. Skipped breakfast again, just had coffee before the meeting
+[10/6, 12:40] Sarah: Ended up grabbing fast food for lunch, didn't have time to prep anything
+[10/6, 19:15] Sarah: Managed a 20 minute walk after work at least
+[10/7, 08:10] Sarah: Feeling pretty stressed honestly, deadline on Friday and I can't switch off
+[10/7, 08:12] Coach: That sounds like a lot. Are you keeping up with water at least?
+[10/7, 08:13] Sarah: Honestly no, maybe 2 glasses of water yesterday, I know that's low
+[10/7, 18:30] Sarah: Did a proper workout tonight though, 45 min at the gym, felt good afterwards
+[10/8, 09:00] Sarah: Slept a bit better, maybe 6 hours. Head is still a bit foggy
+[10/8, 13:20] Sarah: Had a decent lunch today, salad with chicken, trying to do better
+[10/8, 21:45] Sarah: Getting some mild headaches the last couple days, probably stress and not enough water
+[10/9, 08:05] Sarah: Went for a 30 min walk this morning before work, wanted to start the day right
+[10/9, 12:15] Sarah: Forgot to take my magnesium supplement again, third day in a row actually
+[10/9, 20:00] Sarah: Feeling a lot more positive today, mood is better than earlier in the week
+[10/10, 08:30] Sarah: Rough night, stress is really getting to me, maybe 5 hours of broken sleep
+[10/10, 09:00] Coach: Let's talk about some strategies for winding down before bed
+[10/10, 09:05] Sarah: That would help honestly, I know I need it
+[10/10, 17:00] Sarah: Drank a lot more water today, probably 7 glasses, felt noticeably better
+[10/11, 10:00] Sarah: Goal is still to get back to running 3x a week, haven't managed it yet this month
+[10/11, 10:02] Sarah: But I did do that gym session and two walks, so some progress I guess
+[10/11, 20:30] Sarah: Overall a tough week but ending on a better note, thanks for checking in`;
+
+/* ---------------------------------------------------------------------
+   1. NAVIGATION
+   --------------------------------------------------------------------- */
+function showView(id) {
+  ["view-landing", "view-upload", "view-analyzing", "view-app"].forEach(v => {
+    document.getElementById(v).style.display = "none";
+  });
+  document.getElementById(id).style.display = (id === "view-analyzing") ? "flex" : "block";
+}
+function goto(name) { showView("view-" + name); window.scrollTo(0, 0); }
+
+function loadDemo() {
+  goto("upload");
+  switchSource("paste");
+  document.getElementById("pasteArea").value = SAMPLE_CONVO;
+  updateCharCount();
+  setTimeout(startAnalysis, 250);
+}
+function fillSample() {
+  document.getElementById("pasteArea").value = SAMPLE_CONVO;
+  updateCharCount();
+}
+
+/* ---------------------------------------------------------------------
+   2. UPLOAD VIEW
+   --------------------------------------------------------------------- */
+function switchSource(which) {
+  document.getElementById("tab-paste").classList.toggle("active", which === "paste");
+  document.getElementById("tab-file").classList.toggle("active", which === "file");
+  document.getElementById("pane-paste").classList.toggle("hidden", which !== "paste");
+  document.getElementById("pane-file").classList.toggle("hidden", which !== "file");
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const ta = document.getElementById("pasteArea");
+  ta.addEventListener("input", updateCharCount);
+  const dz = document.getElementById("dropzone");
+  dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("drag"); });
+  dz.addEventListener("dragleave", () => dz.classList.remove("drag"));
+  dz.addEventListener("drop", e => {
+    e.preventDefault(); dz.classList.remove("drag");
+    if (e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]);
+  });
+  document.getElementById("chatInput");
+});
+function updateCharCount() {
+  const n = document.getElementById("pasteArea").value.length;
+  document.getElementById("charCount").textContent = n.toLocaleString() + " characters";
+}
+function handleFile(e) {
+  if (e.target.files.length) readFile(e.target.files[0]);
+}
+function readFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = reader.result;
+    switchSource("paste");
+    document.getElementById("pasteArea").value = text;
+    updateCharCount();
+    showPreview(text);
+  };
+  reader.readAsText(file);
+}
+function showPreview(text) {
+  const box = document.getElementById("previewBox");
+  box.classList.remove("hidden");
+  document.getElementById("previewText").textContent = text.slice(0, 1200) + (text.length > 1200 ? "\n…" : "");
+}
+
+/* ---------------------------------------------------------------------
+   3. ANALYSIS ENGINE
+   --------------------------------------------------------------------- */
+
+// --- 3.1 Parse conversation into structured messages ---
+function parseMessages(raw) {
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const msgs = [];
+  const waRe = /^\[?(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?),?\s*(\d{1,2}:\d{2})(?:\s?[APap][Mm])?\]?\s*-?\s*([^:]{1,30}):\s*(.*)$/;
+  const simpleRe = /^([A-Za-z][A-Za-z .'-]{1,24}):\s*(.*)$/;
+  let idx = 0;
+  for (const line of lines) {
+    let m = line.match(waRe);
+    if (m) {
+      msgs.push({ date: m[1], time: m[2], speaker: m[3].trim(), text: m[4].trim(), i: idx++ });
+      continue;
+    }
+    m = line.match(simpleRe);
+    if (m && m[1].split(" ").length <= 3) {
+      msgs.push({ date: null, time: null, speaker: m[1].trim(), text: m[2].trim(), i: idx++ });
+      continue;
+    }
+    // fallback: plain line, attach as continuation / unknown speaker
+    msgs.push({ date: null, time: null, speaker: null, text: line, i: idx++ });
+  }
+  return msgs;
+}
+
+// --- 3.2 Identify coach vs client speaker ---
+function identifySpeakers(msgs) {
+  const speakers = [...new Set(msgs.map(m => m.speaker).filter(Boolean))];
+  let coach = null, client = null;
+  const coachHints = /coach|trainer|dr\.?|admin/i;
+  for (const s of speakers) if (coachHints.test(s)) coach = s;
+  if (!coach && speakers.length >= 2) {
+    // heuristic: whichever speaker asks more questions is the coach
+    const qCount = {};
+    speakers.forEach(s => qCount[s] = 0);
+    msgs.forEach(m => { if (m.speaker && m.text.includes("?")) qCount[m.speaker]++; });
+    coach = speakers.sort((a, b) => qCount[b] - qCount[a])[0];
+  }
+  client = speakers.find(s => s !== coach) || speakers[0] || "Client";
+  if (!coach) coach = "Coach";
+  return { coach, client: client || "Client" };
+}
+
+// --- 3.3 Category definitions ---
+const CATEGORIES = [
+  { key: "sleep", label: "Sleep", icon: "🌙",
+    keywords: ["sleep","slept","insomnia","tired","rest","nap","bed","exhausted","fatigue"],
+    numRe: /(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\b/i, numContext: /sleep|slept|rest/i,
+    negWords: ["tired","exhausted","insomnia","can't sleep","cant sleep","restless","broken sleep","foggy","rough night"],
+    posWords: ["slept great","well rested","good sleep","slept well","refreshed"],
+    classify: (numVal, neg, pos) => {
+      if (numVal != null) return numVal < 6 ? "Poor" : numVal < 7.5 ? "Fair" : "Good";
+      if (neg && !pos) return "Poor"; if (pos && !neg) return "Good"; return neg||pos ? "Fair" : null;
+    } },
+  { key: "hydration", label: "Hydration", icon: "💧",
+    keywords: ["water","hydrat","glasses","dehydrat","thirsty"],
+    numRe: /(\d+)\s*(?:glasses|cups|liters|litres|l)\b/i, numContext: /water|hydrat/i,
+    negWords: ["dehydrat","not drinking enough","low on water","thirsty","barely drank"],
+    posWords: ["drank a lot of water","hydrated well","plenty of water"],
+    classify: (numVal, neg, pos) => {
+      if (numVal != null) return numVal < 4 ? "Low" : numVal < 8 ? "Moderate" : "Good";
+      if (neg && !pos) return "Low"; if (pos && !neg) return "Good"; return neg||pos ? "Moderate" : null;
+    } },
+  { key: "nutrition", label: "Nutrition", icon: "🥗",
+    keywords: ["ate","eat","eating","meal","breakfast","lunch","dinner","skipped","diet","snack","junk food","fast food","protein","vegetables","calories","salad"],
+    negWords: ["skipped breakfast","skipped lunch","junk food","fast food","binge","didn't eat","did not eat","no time to prep"],
+    posWords: ["healthy","balanced meal","vegetables","protein","salad","home cooked","trying to do better"],
+    classify: (numVal, neg, pos) => { if (neg && !pos) return "Poor"; if (pos && !neg) return "Improving"; return (neg||pos) ? "Mixed" : null; } },
+  { key: "exercise", label: "Exercise", icon: "🏃",
+    keywords: ["workout","walk","walked","run","running","gym","exercise","training","steps","yoga","cardio","session"],
+    numRe: /(\d+)\s*(?:min|mins|minutes)\b/i, numContext: /walk|workout|gym|run|exercise|session/i,
+    negWords: ["missed workout","skipped the gym","no time to exercise","haven't managed","have not managed"],
+    posWords: ["workout","walk","gym","went for a run","training session","felt good afterwards"],
+    classify: (numVal, neg, pos) => { if (pos && !neg) return "Active"; if (neg && !pos) return "Inactive"; return (neg||pos) ? "Mixed" : null; } },
+  { key: "stress", label: "Stress", icon: "🧠",
+    keywords: ["stress","stressed","overwhelmed","anxious","anxiety","pressure","deadline","burnout","can't switch off","cant switch off"],
+    negWords: ["stressed","overwhelmed","anxious","pressure","deadline","can't switch off","cant switch off","getting to me"],
+    posWords: ["relaxed","calm","manageable","feeling positive","less stressed"],
+    classify: (numVal, neg, pos) => { if (neg && !pos) return "High"; if (pos && !neg) return "Low"; return (neg||pos) ? "Moderate" : null; } },
+  { key: "symptoms", label: "Symptoms", icon: "🩺",
+    keywords: ["headache","pain","nausea","dizzy","fatigue","sore","ache","cramp","fever","cough","foggy","migraine"],
+    negWords: ["headache","pain","nausea","dizzy","sore","ache","cramp","fever","migraine"],
+    posWords: [],
+    classify: (numVal, neg) => neg ? "Present" : null },
+  { key: "mood", label: "Mood", icon: "🙂",
+    keywords: ["happy","sad","down","depressed","motivated","frustrated","excited","mood","feeling low","positive","negative","tough week"],
+    negWords: ["down","depressed","frustrated","feeling low","tough week","rough"],
+    posWords: ["happy","motivated","excited","positive","better than earlier","good note"],
+    classify: (numVal, neg, pos) => { if (pos && !neg) return "Positive"; if (neg && !pos) return "Low"; return (neg||pos) ? "Mixed" : null; } },
+  { key: "medication", label: "Medication", icon: "💊",
+    keywords: ["medication","pill","dose","prescription","mg","tablet","supplement","magnesium","vitamin"],
+    negWords: ["forgot to take","missed my dose","forgot","ran out of","skipped my"],
+    posWords: ["took my","stayed on top of","consistent with"],
+    classify: (numVal, neg, pos) => { if (neg && !pos) return "Inconsistent"; if (pos && !neg) return "Adherent"; return (neg||pos) ? "Mentioned" : null; } },
+  { key: "goals", label: "Goals", icon: "🎯",
+    keywords: ["goal","target","aim","trying to","want to","plan to","progress"],
+    negWords: ["haven't managed","have not managed","behind on","struggling to"],
+    posWords: ["some progress","on track","made progress","hit my goal"],
+    classify: (numVal, neg, pos) => { if (pos && !neg) return "On Track"; if (neg && !pos) return "At Risk"; return (neg||pos) ? "In Progress" : null; } },
+];
+
+// Per-category polarity: which literal status strings count as "good" vs "concerning".
+// (Generic string matching like "High" is ambiguous — High engagement is good, High stress is bad.)
+const GOOD_STATUS = {
+  sleep: ["Good"], hydration: ["Good"], nutrition: ["Improving"], exercise: ["Active"],
+  stress: ["Low"], mood: ["Positive"], medication: ["Adherent"], goals: ["On Track"],
+  engagement: ["High"],
+};
+const BAD_STATUS = {
+  sleep: ["Poor"], hydration: ["Low"], nutrition: ["Poor"], exercise: ["Inactive"],
+  stress: ["High"], mood: ["Low"], medication: ["Inconsistent"], goals: ["At Risk"],
+  symptoms: ["Present"], engagement: ["Low"],
+};
+function isGoodModule(m) { return (GOOD_STATUS[m.key] || []).includes(m.status); }
+function isBadModule(m) { return (BAD_STATUS[m.key] || []).includes(m.status); }
+
+// --- 3.4 Sentence utilities ---
+function splitSentences(text) {
+  return text
+    .replace(/\n+/g, ". ")
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 3);
+}
+function classifySource(sentence) {
+  if (/\b\d+(\.\d+)?\s*(hours?|hrs?|glasses|cups|liters?|litres?|min|mins|minutes|mg|x\s*a\s*week|times?)\b/i.test(sentence)) return "confirmed";
+  if (/\bi\s+(feel|felt|think|guess|honestly|maybe|probably)\b/i.test(sentence)) return "reported";
+  return "reported";
+}
+
+// --- 3.5 Run full analysis ---
+function analyzeConversation(raw) {
+  const msgs = parseMessages(raw);
+  const { coach, client } = identifySpeakers(msgs);
+  const clientMsgs = msgs.filter(m => !m.speaker || m.speaker !== coach);
+  const fullText = clientMsgs.map(m => m.text).join(" ");
+  const sentences = [];
+  clientMsgs.forEach(m => { splitSentences(m.text).forEach(s => sentences.push(s)); });
+
+  const modules = {};
+  CATEGORIES.forEach(cat => {
+    const hitSentences = sentences.filter(s => cat.keywords.some(k => s.toLowerCase().includes(k)));
+    let numVal = null;
+    for (const s of hitSentences) {
+      if (cat.numRe && (!cat.numContext || cat.numContext.test(s))) {
+        const m = s.match(cat.numRe);
+        if (m) { numVal = parseFloat(m[1]); break; }
+      }
+    }
+    const neg = hitSentences.some(s => (cat.negWords || []).some(w => s.toLowerCase().includes(w)));
+    const pos = hitSentences.some(s => (cat.posWords || []).some(w => s.toLowerCase().includes(w)));
+    const status = cat.classify(numVal, neg, pos);
+
+    let sourceType, confidence;
+    if (hitSentences.length === 0) {
+      sourceType = "missing"; confidence = 15;
+    } else {
+      sourceType = numVal != null ? "confirmed" : (hitSentences.length >= 2 ? "reported" : "inference");
+      confidence = Math.min(95, 45 + hitSentences.length * 14 + (numVal != null ? 15 : 0));
+    }
+    modules[cat.key] = {
+      key: cat.key, label: cat.label, icon: cat.icon,
+      status: status || (hitSentences.length ? "Mentioned" : "No data"),
+      sourceType, confidence,
+      evidence: hitSentences.slice(0, 2),
+      numVal,
+      mentions: hitSentences.length,
+    };
+  });
+
+  // engagement (derived from message stats, not keywords)
+  const clientMsgCount = clientMsgs.filter(m => m.speaker).length || clientMsgs.length;
+  const avgLen = fullText.length / Math.max(1, clientMsgCount);
+  const engagementScore = Math.max(20, Math.min(98, clientMsgCount * 6 + Math.min(30, avgLen / 3)));
+  modules.engagement = {
+    key: "engagement", label: "Engagement", icon: "📈",
+    status: engagementScore > 70 ? "High" : engagementScore > 45 ? "Moderate" : "Low",
+    sourceType: "inference", confidence: 70,
+    evidence: [`${clientMsgCount} client messages detected across the conversation, averaging ~${Math.round(avgLen)} characters each.`],
+    numVal: Math.round(engagementScore), mentions: clientMsgCount,
+  };
+
+  // pending tasks: coach questions in the last portion with no clear client follow-up commitment
+  const coachQuestions = msgs.filter(m => m.speaker === coach && m.text.includes("?"));
+  const pendingTasks = coachQuestions.slice(-3).map(q => `Follow up on: "${q.text}"`);
+
+  // health score: weighted composite (0-100), higher = better
+  const scoreMap = { sleep: {Good:90,Fair:65,Poor:35}, hydration:{Good:88,Moderate:60,Low:30},
+    nutrition:{Improving:80,Mixed:55,Poor:30}, exercise:{Active:85,Mixed:55,Inactive:30},
+    stress:{Low:88,Moderate:58,High:28}, mood:{Positive:85,Mixed:55,Low:30} };
+  let scoreSum = 0, scoreN = 0;
+  ["sleep","hydration","nutrition","exercise","stress","mood"].forEach(k => {
+    const st = modules[k].status;
+    if (scoreMap[k] && scoreMap[k][st] != null) { scoreSum += scoreMap[k][st]; scoreN++; }
+  });
+  const healthScore = scoreN ? Math.round(scoreSum / scoreN) : 60;
+
+  // risk engine
+  const risks = [];
+  function pushRisk(id, label, level, confidence, evidence, source) {
+    risks.push({ id, label, level, confidence, evidence, source });
+  }
+  if (["Poor"].includes(modules.sleep.status)) pushRisk("sleep_risk","Sleep Risk", modules.sleep.mentions>=2?"High":"Medium", modules.sleep.confidence, modules.sleep.evidence[0]||"Repeated short sleep duration reported.","reported");
+  if (["Poor"].includes(modules.nutrition.status)) pushRisk("nutrition_risk","Nutrition Risk","Medium", modules.nutrition.confidence, modules.nutrition.evidence[0]||"Irregular eating pattern reported.","reported");
+  if (["High"].includes(modules.stress.status)) pushRisk("stress_risk","Stress Risk", modules.stress.mentions>=2?"High":"Medium", modules.stress.confidence, modules.stress.evidence[0]||"Elevated stress language detected.","reported");
+  if (modules.stress.status === "High" && modules.sleep.status === "Poor") {
+    pushRisk("burnout_risk","Burnout Risk","High", Math.round((modules.stress.confidence+modules.sleep.confidence)/2),
+      "Inferred from concurrent high stress and poor sleep across multiple messages.", "inference");
+  }
+  if (["Inactive"].includes(modules.exercise.status)) pushRisk("exercise_risk","Exercise Risk","Low", modules.exercise.confidence, modules.exercise.evidence[0]||"Limited physical activity reported.","reported");
+  if (["Inconsistent"].includes(modules.medication.status)) pushRisk("medication_risk","Medication Risk","Medium", modules.medication.confidence, modules.medication.evidence[0]||"Missed doses reported.","reported");
+  if (modules.symptoms.status === "Present") pushRisk("symptom_risk","Symptom Watch","Low", modules.symptoms.confidence, modules.symptoms.evidence[0]||"Physical symptoms mentioned.","reported");
+
+  const riskRank = { High: 3, Medium: 2, Low: 1 };
+  const overallRisk = risks.length ? risks.reduce((a,b)=> riskRank[b.level]>riskRank[a.level]?b:a).level : "Low";
+
+  // timeline
+  const timeline = buildTimeline(msgs, coach, CATEGORIES);
+
+  // confidence overall
+  const confVals = Object.values(modules).map(m => m.confidence);
+  const aiConfidence = Math.round(confVals.reduce((a,b)=>a+b,0) / confVals.length);
+
+  // goal progress heuristic
+  const goalProgress = modules.goals.status === "On Track" ? 78 : modules.goals.status === "In Progress" ? 55 : modules.goals.status === "At Risk" ? 30 : 45;
+
+  const improvements = Object.values(modules).filter(isGoodModule);
+  const concerns = Object.values(modules).filter(isBadModule);
+
+  const summary = buildSummary({ client, coach, modules, risks, overallRisk, healthScore, improvements, concerns });
+  const draft = buildDraft({ client, coach, modules, improvements, concerns });
+
+  return {
+    client, coach, msgs, modules, risks, overallRisk, healthScore, aiConfidence,
+    engagementScore: Math.round(engagementScore), goalProgress, timeline, pendingTasks,
+    summary, draft, improvements, concerns,
+    evidenceCoverage: Math.round(100 * Object.values(modules).filter(m=>m.sourceType!=="missing").length / Object.values(modules).length),
+    missingCount: Object.values(modules).filter(m=>m.sourceType==="missing").length,
+    generatedAt: new Date(),
+  };
+}
+
+function buildTimeline(msgs, coach, categories) {
+  const dated = msgs.filter(m => m.date && m.speaker !== coach);
+  const days = {};
+  const order = [];
+  if (dated.length) {
+    dated.forEach(m => {
+      if (!days[m.date]) { days[m.date] = []; order.push(m.date); }
+      const hit = categories.find(c => c.keywords.some(k => m.text.toLowerCase().includes(k)));
+      if (hit) days[m.date].push({ label: shortEventLabel(m.text, hit), sourceType: classifySource(m.text), cat: hit.key });
+    });
+  } else {
+    // no dates — distribute sentences across weekdays
+    const weekdays = ["Mon","Tue","Wed","Thu","Fri"];
+    const sentences = splitSentences(msgs.map(m=>m.text).join(" "));
+    sentences.forEach((s, i) => {
+      const day = weekdays[i % weekdays.length];
+      if (!days[day]) { days[day] = []; order.push(day); }
+      const hit = categories.find(c => c.keywords.some(k => s.toLowerCase().includes(k)));
+      if (hit) days[day].push({ label: shortEventLabel(s, hit), sourceType: classifySource(s), cat: hit.key });
+    });
+  }
+  return order.slice(0, 7).map(d => ({ day: d, events: days[d].slice(0, 3) })).filter(d => d.events.length);
+}
+function shortEventLabel(sentence, cat) {
+  const clean = sentence.replace(/^\W+/, "");
+  const words = clean.split(" ").slice(0, 8).join(" ");
+  return cat.label + ": " + (words.length < clean.length ? words + "…" : words);
+}
+
+function buildSummary({ client, coach, modules, risks, overallRisk, healthScore, improvements, concerns }) {
+  const impList = improvements.slice(0,2).map(m => m.label.toLowerCase()).join(" and ") || "no clear improvements this period";
+  const conList = concerns.slice(0,2).map(m => m.label.toLowerCase()).join(" and ") || "no major concerns flagged";
+  const priority = risks.length ? risks.reduce((a,b)=> ({High:3,Medium:2,Low:1}[b.level] > ({High:3,Medium:2,Low:1}[a.level]) ? b : a)).label : "No urgent priorities — maintain current momentum";
+  return {
+    weeklySummary: `${client}'s conversation this week shows a health score of ${healthScore}/100. Engagement was ${modules.engagement.status.toLowerCase()}, based on ${modules.engagement.mentions} client messages analyzed.`,
+    overallHealth: healthScore >= 75 ? "Good, trending positively" : healthScore >= 55 ? "Fair, mixed signals across modules" : "Needs attention — multiple modules flagged",
+    improvements: impList,
+    concerns: conList,
+    priority,
+    overallRisk,
+  };
+}
+function buildDraft({ client, coach, modules, improvements, concerns }) {
+  const firstName = client.split(" ")[0];
+  const impLine = improvements[0] ? `Great work with your ${improvements[0].label.toLowerCase()} this week — that's a real positive.` : `Thanks for staying engaged and checking in this week.`;
+  const conLine = concerns[0] ? `I did notice your ${concerns[0].label.toLowerCase()} could use some attention (${modules[concerns[0].key].status.toLowerCase()}) — let's keep an eye on that.` : `Nothing major is standing out as a concern right now.`;
+  const secondCon = concerns[1] ? ` I'd also suggest focusing on ${concerns[1].label.toLowerCase()} over the coming week.` : "";
+  return `Hi ${firstName},\n\n${impLine}\n\n${conLine}${secondCon}\n\nLet's aim for small, specific goals this week rather than trying to fix everything at once. I'm here if you want to talk through a plan.\n\nTalk soon,\n${coach}`;
+}
+
+/* ---------------------------------------------------------------------
+   4. ANALYZING VIEW (fake-progress animation, real work underneath)
+   --------------------------------------------------------------------- */
+const THINK_STEPS = [
+  "Reading conversation…",
+  "Understanding health context…",
+  "Extracting nutrition…",
+  "Analyzing symptoms…",
+  "Finding supporting evidence…",
+  "Building client profile…",
+  "Generating recommendations…",
+];
+function startAnalysis() {
+  const raw = document.getElementById("pasteArea").value.trim();
+  if (!raw || raw.length < 20) {
+    alert("Paste or upload a conversation first (at least a few messages).");
+    return;
+  }
+  state.rawText = raw;
+  goto("analyzing");
+  const box = document.getElementById("thinkLines");
+  box.innerHTML = "";
+  THINK_STEPS.forEach((t, i) => {
+    const d = document.createElement("div");
+    d.className = "think-line"; d.textContent = t; d.id = "think-" + i;
+    box.appendChild(d);
+  });
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i > 0) document.getElementById("think-" + (i-1)).classList.add("done");
+    if (i < THINK_STEPS.length) {
+      document.getElementById("think-" + i).classList.add("show");
+      i++;
+    } else {
+      clearInterval(interval);
+      const result = analyzeConversation(state.rawText);
+      state.analysis = result;
+      seedReviews(result);
+      seedClients(result);
+      setTimeout(() => { renderDashboard(); goto("app"); }, 350);
+    }
+  }, 430);
+}
+
+/* ---------------------------------------------------------------------
+   5. RENDER: DASHBOARD
+   --------------------------------------------------------------------- */
+function renderDashboard() {
+  const a = state.analysis;
+  document.getElementById("topClientName").textContent = a.client;
+  document.getElementById("topClientMeta").textContent = `Analyzed just now · ${a.msgs.length} messages parsed`;
+
+  // KPI cards
+  const kpis = [
+    { lbl: "Health Score", val: a.healthScore + "/100", sub: a.summary.overallHealth, color: a.healthScore>=75?"var(--sage)":a.healthScore>=55?"var(--amber)":"var(--rose)" },
+    { lbl: "Engagement", val: a.engagementScore + "%", sub: a.modules.engagement.status + " participation" },
+    { lbl: "Risk Level", val: a.overallRisk, sub: a.risks.length + " risk flag(s)", color: a.overallRisk==="High"?"var(--rose)":a.overallRisk==="Medium"?"var(--amber)":"var(--sage)" },
+    { lbl: "AI Confidence", val: a.aiConfidence + "%", sub: "Across " + Object.keys(a.modules).length + " modules" },
+    { lbl: "Weekly Goal Progress", val: a.goalProgress + "%", sub: a.modules.goals.status },
+  ];
+  document.getElementById("kpiGrid").innerHTML = kpis.map(k => `
+    <div class="card kpi-card fade-in">
+      <div class="lbl">${k.lbl}</div>
+      <div class="val" style="${k.color ? `color:${k.color}` : ""}">${k.val}</div>
+      <div class="sub">${k.sub}</div>
+    </div>`).join("");
+
+  // Summary card
+  document.getElementById("summaryConfBadge").textContent = "Confidence " + a.aiConfidence + "%";
+  document.getElementById("summaryBody").innerHTML = `
+    <p style="margin:0 0 10px;"><b>Weekly Summary —</b> ${a.summary.weeklySummary}</p>
+    <p style="margin:0 0 10px;"><b>Overall Health —</b> ${a.summary.overallHealth}</p>
+    <p style="margin:0 0 10px;"><b>Major Improvements —</b> ${a.summary.improvements}</p>
+    <p style="margin:0 0 10px;"><b>Major Concerns —</b> ${a.summary.concerns}</p>
+    <p style="margin:0;"><b>Coach Priority —</b> ${a.summary.priority}</p>`;
+
+  // Module grid
+  document.getElementById("moduleGrid").innerHTML = Object.values(a.modules).map(m => moduleCardHTML(m)).join("");
+
+  // Risk panel
+  document.getElementById("riskPanel").innerHTML = a.risks.length ? a.risks.map(r => `
+    <div style="padding:10px 0;border-bottom:1px solid var(--line);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-weight:600;font-size:13.5px;">${r.label}</span>
+        <span class="badge badge-risk-${r.level.toLowerCase()}">${r.level} · ${r.confidence}%</span>
+      </div>
+      <div class="evidence ${r.source==='inference'?'inference':'reported'}">${escapeHtml(r.evidence)}</div>
+    </div>`).join("") : `<div style="color:var(--ink-faint);font-size:13px;padding:8px 0;">No active risk flags detected.</div>`;
+
+  // Timeline
+  document.getElementById("timelineBox").innerHTML = a.timeline.length ? a.timeline.map(d => `
+    <div class="tl-row">
+      <div class="tl-day">${d.day}</div>
+      <div class="tl-events">
+        ${d.events.map(e => `<div class="tl-event"><span class="tl-tag badge badge-${e.sourceType==='confirmed'?'confirmed':'reported'}" style="padding:2px 6px;">●</span><span>${escapeHtml(e.label)}</span></div>`).join("")}
+      </div>
+    </div>`).join("") : `<div style="color:var(--ink-faint);font-size:13px;">Not enough dated messages to build a timeline.</div>`;
+
+  // Draft
+  document.getElementById("draftBox").value = a.draft;
+  state.draft = a.draft;
+
+  renderReview();
+  renderSafety();
+  renderClients();
+  renderAnalytics();
+  seedChatIntro();
+}
+
+function moduleCardHTML(m) {
+  const srcBadge = { confirmed: "Confirmed Fact", reported: "Client Reported", inference: "AI Inference", missing: "Missing Information" }[m.sourceType];
+  const srcClass = { confirmed: "badge-confirmed", reported: "badge-reported", inference: "badge-inference", missing: "badge-missing" }[m.sourceType];
+  return `
+  <div class="card module-card fade-in">
+    <div class="module-head">
+      <div class="module-title"><span>${m.icon}</span> ${m.label}</div>
+      <span class="badge ${statusBadgeClass(m)}">${m.status}</span>
+    </div>
+    <div class="conf-bar"><span>Confidence</span><div class="conf-track"><div class="conf-fill" style="width:${m.confidence}%"></div></div><span>${m.confidence}%</span></div>
+    <span class="badge ${srcClass}" style="width:fit-content;">${srcBadge}</span>
+    ${m.evidence.length ? `<div class="evidence ${m.sourceType==='confirmed'?'confirmed':m.sourceType==='inference'?'inference':'reported'}">"${escapeHtml(truncate(m.evidence[0],140))}"</div>`
+      : `<div class="evidence" style="border-color:var(--slate);color:var(--ink-faint);">No mentions found in this conversation.</div>`}
+  </div>`;
+}
+function statusBadgeClass(m) {
+  if (isGoodModule(m)) return "badge-confirmed";
+  if (isBadModule(m)) return "badge-risk-high";
+  if (m.status === "No data") return "badge-missing";
+  return "badge-inference";
+}
+function truncate(s, n) { return s.length > n ? s.slice(0, n) + "…" : s; }
+function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+function regenDraft() {
+  const a = state.analysis;
+  // small variation: shuffle which improvement/concern leads
+  const variants = [a.draft, buildDraft({ client: a.client, coach: a.coach, modules: a.modules, improvements: [...a.improvements].reverse(), concerns: a.concerns })];
+  document.getElementById("draftBox").value = variants[1];
+  state.draft = variants[1];
+}
+function approveDraft(event) {
+  logAudit("Coach Draft Response", "Approved", "Coach");
+  flashButton(event.target, "Approved ✓");
+}
+function copyDraft(event) {
+  navigator.clipboard?.writeText(document.getElementById("draftBox").value);
+  flashButton(event.target, "Copied ✓");
+}
+function flashButton(btn, text) {
+  const orig = btn.textContent; btn.textContent = text;
+  setTimeout(() => btn.textContent = orig, 1400);
+}
+
+/* ---------------------------------------------------------------------
+   6. TABS
+   --------------------------------------------------------------------- */
+function switchTab(tab) {
+  document.querySelectorAll(".side-link[data-tab]").forEach(l => l.classList.toggle("active", l.dataset.tab === tab));
+  document.querySelectorAll(".tabpanel").forEach(p => p.classList.remove("active"));
+  document.getElementById("tab-" + tab).classList.add("active");
+}
+
+/* ---------------------------------------------------------------------
+   7. ANALYTICS TAB (simulated multi-week trend)
+   --------------------------------------------------------------------- */
+function renderAnalytics() {
+  const a = state.analysis;
+  const trendCats = ["sleep","hydration","stress","exercise","nutrition"];
+  const numericBase = {
+    sleep: a.modules.sleep.numVal ?? (a.modules.sleep.status==="Good"?7.5:a.modules.sleep.status==="Fair"?6.2:5),
+    hydration: a.modules.hydration.numVal ?? (a.modules.hydration.status==="Good"?8:a.modules.hydration.status==="Moderate"?5:2.5),
+    stress: a.modules.stress.status==="High"?80:a.modules.stress.status==="Moderate"?55:25,
+    exercise: a.modules.exercise.status==="Active"?70:a.modules.exercise.status==="Mixed"?45:20,
+    nutrition: a.modules.nutrition.status==="Improving"?75:a.modules.nutrition.status==="Mixed"?50:25,
+  };
+  document.getElementById("trendGrid").innerHTML = trendCats.map(k => {
+    const cat = CATEGORIES.find(c=>c.key===k);
+    const series = synthTrend(numericBase[k]);
+    return `<div class="card module-card">
+      <div class="module-title"><span>${cat.icon}</span> ${cat.label} Trend</div>
+      ${sparkline(series, k==="stress")}
+      <div style="font-size:11.5px;color:var(--ink-faint);">6-week simulated trend · this week: <b style="color:var(--ink)">${series[series.length-1].toFixed(1)}</b></div>
+    </div>`;
+  }).join("");
+}
+function synthTrend(current) {
+  // deterministic pseudo-random walk ending at `current`
+  let seed = Math.round(current * 97) % 1000;
+  const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  const pts = [current];
+  for (let i = 0; i < 5; i++) {
+    const prev = pts[0];
+    const delta = (rand() - 0.5) * (current * 0.22 + 1);
+    pts.unshift(Math.max(0, prev - delta));
+  }
+  return pts;
+}
+function sparkline(series, invert) {
+  const w = 220, h = 56, pad = 6;
+  const max = Math.max(...series), min = Math.min(...series);
+  const range = (max - min) || 1;
+  const pts = series.map((v, i) => {
+    const x = pad + (i / (series.length - 1)) * (w - pad*2);
+    const y = h - pad - ((v - min) / range) * (h - pad*2);
+    return `${x},${y}`;
+  }).join(" ");
+  const good = invert ? series[series.length-1] < series[0] : series[series.length-1] >= series[0];
+  const color = good ? "var(--sage)" : "var(--amber)";
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+/* ---------------------------------------------------------------------
+   8. HUMAN REVIEW TAB
+   --------------------------------------------------------------------- */
+function seedReviews(a) {
+  state.reviews = Object.values(a.modules).filter(m => m.sourceType !== "missing").map(m => ({
+    id: m.key, title: m.label + ": " + m.status, source: m.sourceType, status: "pending",
+    evidence: m.evidence[0] || "", confidence: m.confidence,
+  })).concat(a.risks.map(r => ({ id: r.id, title: r.label + " (" + r.level + ")", source: r.source, status: "pending", evidence: r.evidence, confidence: r.confidence })));
+  state.audit = [];
+}
+function renderReview() {
+  document.getElementById("reviewList").innerHTML = state.reviews.map(r => `
+    <div class="review-item" id="review-${r.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+        <div>
+          <div style="font-weight:600;font-size:13.5px;">${escapeHtml(r.title)}</div>
+          <div class="evidence" style="margin-top:8px;max-width:520px;">${escapeHtml(r.evidence)}</div>
+        </div>
+        <span class="review-status status-${r.status}">${r.status}</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn btn-ghost btn-sm" onclick="reviewAction('${r.id}','approved')">Approve</button>
+        <button class="btn btn-ghost btn-sm" onclick="reviewEdit('${r.id}')">Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="reviewAction('${r.id}','rejected')">Reject</button>
+      </div>
+    </div>`).join("");
+  renderAudit();
+}
+function reviewAction(id, action) {
+  const r = state.reviews.find(x => x.id === id);
+  if (!r) return;
+  r.status = action;
+  logAudit(r.title, action === "approved" ? "Approved" : "Rejected", "Coach");
+  renderReview();
+}
+function reviewEdit(id) {
+  const r = state.reviews.find(x => x.id === id);
+  if (!r) return;
+  const val = prompt("Edit insight text:", r.title);
+  if (val && val.trim() && val !== r.title) {
+    r.title = val.trim();
+    r.status = "edited";
+    logAudit(r.title, "Coach Edited", "Coach");
+    renderReview();
+  }
+}
+function logAudit(item, action, by) {
+  state.audit.unshift({ item, action, by, time: new Date().toLocaleTimeString() });
+}
+function renderAudit() {
+  document.getElementById("auditBody").innerHTML = state.audit.length ? state.audit.map(e => `
+    <tr><td>${escapeHtml(e.item)}</td><td><span class="badge ${e.action.includes('Approve')?'badge-confirmed':e.action.includes('Reject')?'badge-risk-high':'badge-inference'}">${e.action}</span></td><td>${e.by}</td><td>${e.time}</td></tr>
+  `).join("") : `<tr><td colspan="4" style="color:var(--ink-faint);">No review actions yet — AI Generated insights are awaiting review.</td></tr>`;
+}
+
+/* ---------------------------------------------------------------------
+   9. SAFETY TAB
+   --------------------------------------------------------------------- */
+function renderSafety() {
+  const a = state.analysis;
+  const metrics = [
+    { lbl: "Hallucination Risk", val: "Low", note: "All statements trace to extracted conversation text; no unsupported claims generated.", color: "var(--sage)" },
+    { lbl: "Missing Data", val: a.missingCount + " module(s)", note: "Categories with no conversational evidence are explicitly marked, not inferred.", color: a.missingCount>2?"var(--amber)":"var(--sage)" },
+    { lbl: "Human Review Pending", val: state.reviews.filter(r=>r.status==="pending").length + " item(s)", note: "AI insights remain provisional until a coach approves, edits, or rejects them.", color: "var(--brand)" },
+    { lbl: "Evidence Coverage", val: a.evidenceCoverage + "%", note: "Share of modules backed by direct quotes from the conversation.", color: a.evidenceCoverage>=70?"var(--sage)":"var(--amber)" },
+  ];
+  document.getElementById("safetyBox").innerHTML = metrics.map(m => `
+    <div class="safety-metric">
+      <div><div style="font-weight:600;font-size:13.5px;">${m.lbl}</div><div style="font-size:12px;color:var(--ink-dim);max-width:440px;margin-top:2px;">${m.note}</div></div>
+      <div style="font-weight:700;font-family:'Fraunces',serif;font-size:18px;color:${m.color}">${m.val}</div>
+    </div>`).join("");
+}
+
+/* ---------------------------------------------------------------------
+   10. CLIENTS TAB
+   --------------------------------------------------------------------- */
+function seedClients(a) {
+  const mockRoster = [
+    { name: "James O.", score: 82, risk: "Low", last: "3 days ago" },
+    { name: "Priya K.", score: 58, risk: "Medium", last: "1 day ago" },
+    { name: "David L.", score: 41, risk: "High", last: "Today" },
+  ];
+  state.clients = [{ name: a.client, score: a.healthScore, risk: a.overallRisk, last: "Just now", isCurrent: true }, ...mockRoster];
+}
+function renderClients() {
+  document.getElementById("statTotalClients").textContent = state.clients.length;
+  document.getElementById("statHighRisk").textContent = state.clients.filter(c => c.risk === "High").length;
+  document.getElementById("statFollowups").textContent = state.clients.filter(c => c.risk !== "Low").length;
+  document.getElementById("clientsBody").innerHTML = state.clients.map(c => `
+    <tr>
+      <td style="font-weight:600;">${escapeHtml(c.name)} ${c.isCurrent ? '<span class="badge badge-reported" style="margin-left:6px;">current</span>' : ''}</td>
+      <td>${c.score}/100</td>
+      <td><span class="badge badge-risk-${c.risk.toLowerCase()}">${c.risk}</span></td>
+      <td>${c.last}</td>
+      <td><span class="badge badge-inference">Awaiting review</span></td>
+    </tr>`).join("");
+}
+
+/* ---------------------------------------------------------------------
+   11. SEARCH TAB
+   --------------------------------------------------------------------- */
+function runSearch() {
+  const q = document.getElementById("searchInput").value.trim().toLowerCase();
+  const box = document.getElementById("searchResults");
+  if (!q) { box.innerHTML = ""; return; }
+  const a = state.analysis;
+  const results = [];
+  Object.values(a.modules).forEach(m => {
+    m.evidence.forEach(e => { if (e.toLowerCase().includes(q)) results.push({ type: m.label + " evidence", text: e }); });
+    if (m.label.toLowerCase().includes(q) || m.status.toLowerCase().includes(q)) results.push({ type: "Module", text: `${m.label}: ${m.status}` });
+  });
+  a.risks.forEach(r => { if (r.label.toLowerCase().includes(q) || r.evidence.toLowerCase().includes(q)) results.push({ type: "Risk", text: `${r.label} — ${r.evidence}` }); });
+  if (a.draft.toLowerCase().includes(q)) results.push({ type: "Coach Draft", text: a.draft.slice(0,140)+"…" });
+
+  box.innerHTML = results.length ? results.map(r => `
+    <div class="card" style="padding:12px 16px;margin-bottom:8px;">
+      <span class="badge badge-reported" style="margin-bottom:6px;">${r.type}</span>
+      <div style="font-size:13px;margin-top:6px;">${escapeHtml(r.text)}</div>
+    </div>`).join("") : `<div style="color:var(--ink-faint);font-size:13px;">No matches found.</div>`;
+}
+
+/* ---------------------------------------------------------------------
+   12. CHAT ASSISTANT
+   --------------------------------------------------------------------- */
+function toggleChat() { document.getElementById("chatPanel").classList.toggle("open"); }
+function seedChatIntro() {
+  state.chatLog = [{ role: "bot", text: `Hi, I'm Coach AI. Ask me anything about ${state.analysis.client}'s conversation — I'll only answer from what's actually in the data.` }];
+  renderChat();
+  renderChatSuggests();
+}
+const CHAT_SUGGESTS = ["Summarize conversation","Biggest health concern","What changed this week?","Why is stress high?","What evidence supports this?"];
+function renderChatSuggests() {
+  document.getElementById("chatSuggests").innerHTML = CHAT_SUGGESTS.map(s => `<button class="chat-suggest" onclick="askChat('${s.replace(/'/g,"\\'")}')">${s}</button>`).join("");
+}
+function askChat(q) { document.getElementById("chatInput").value = q; sendChat(); }
+function sendChat() {
+  const input = document.getElementById("chatInput");
+  const q = input.value.trim();
+  if (!q) return;
+  state.chatLog.push({ role: "user", text: q });
+  input.value = "";
+  const answer = chatAnswer(q);
+  state.chatLog.push({ role: "bot", text: answer });
+  renderChat();
+}
+function renderChat() {
+  document.getElementById("chatBody").innerHTML = state.chatLog.map(m => `<div class="chat-msg ${m.role}">${escapeHtml(m.text)}</div>`).join("");
+  const body = document.getElementById("chatBody"); body.scrollTop = body.scrollHeight;
+}
+function chatAnswer(q) {
+  const a = state.analysis; const ql = q.toLowerCase();
+  if (/summar/.test(ql)) return a.summary.weeklySummary + " Improvements: " + a.summary.improvements + ". Concerns: " + a.summary.concerns + ".";
+  if (/concern|risk|worry|worst/.test(ql)) {
+    if (!a.risks.length) return "No supporting evidence found in the uploaded conversation for an active risk.";
+    const top = a.risks.reduce((x,y)=> ({High:3,Medium:2,Low:1}[y.level] > ({High:3,Medium:2,Low:1}[x.level]) ? y : x));
+    return `The biggest concern is ${top.label} (${top.level}, ${top.confidence}% confidence). Evidence: "${top.evidence}"`;
+  }
+  if (/chang(e|ed)|this week/.test(ql)) return `This week: improvements in ${a.summary.improvements}; concerns around ${a.summary.concerns}. Overall health score is ${a.healthScore}/100.`;
+  if (/stress/.test(ql)) {
+    const m = a.modules.stress;
+    return m.sourceType === "missing" ? "No supporting evidence found in the uploaded conversation." : `Stress is ${m.status.toLowerCase()} (${m.confidence}% confidence). Evidence: "${m.evidence[0]}"`;
+  }
+  if (/sleep/.test(ql)) { const m = a.modules.sleep; return m.sourceType==="missing" ? "No supporting evidence found in the uploaded conversation." : `Sleep is ${m.status.toLowerCase()}. Evidence: "${m.evidence[0]}"`; }
+  if (/evidence|support|source/.test(ql)) {
+    const withEv = Object.values(a.modules).filter(m => m.evidence.length);
+    if (!withEv.length) return "No supporting evidence found in the uploaded conversation.";
+    return withEv.map(m => `${m.label}: "${m.evidence[0]}"`).join(" | ");
+  }
+  if (/reply|response|draft|message/.test(ql)) return "Here's the current draft coach response:\n\n" + a.draft;
+  if (/goal/.test(ql)) { const m = a.modules.goals; return m.sourceType==="missing" ? "No supporting evidence found in the uploaded conversation." : `Goals status: ${m.status}. Evidence: "${m.evidence[0]||''}"`; }
+  // generic keyword match against modules
+  for (const m of Object.values(a.modules)) {
+    if (ql.includes(m.key)) return m.sourceType === "missing" ? "No supporting evidence found in the uploaded conversation." : `${m.label} is ${m.status.toLowerCase()} (${m.confidence}% confidence). Evidence: "${m.evidence[0]||''}"`;
+  }
+  return "No supporting evidence found in the uploaded conversation.";
+}
+
+/* ---------------------------------------------------------------------
+   13. EXPORT
+   --------------------------------------------------------------------- */
+function buildExportObject() {
+  const a = state.analysis;
+  const out = { client: a.client, generatedAt: a.generatedAt.toISOString(), weeklySummary: a.summary, healthScore: a.healthScore, aiConfidence: a.aiConfidence };
+  Object.values(a.modules).forEach(m => {
+    out[m.key] = { status: m.status, confidence: m.confidence, sourceType: m.sourceType, evidence: m.evidence };
+  });
+  out.riskFlags = a.risks.map(r => ({ label: r.label, level: r.level, confidence: r.confidence, evidence: r.evidence, source: r.source }));
+  out.coachRecommendation = document.getElementById("draftBox")?.value || a.draft;
+  return out;
+}
+function exportJSON() {
+  const obj = buildExportObject();
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url; link.download = `fume-${state.analysis.client.replace(/\s+/g,'_')}-report.json`;
+  link.click(); URL.revokeObjectURL(url);
+}
+function copyReport() {
+  const a = state.analysis;
+  const text = `FUME Client Report — ${a.client}\n\nHealth Score: ${a.healthScore}/100\nRisk Level: ${a.overallRisk}\nAI Confidence: ${a.aiConfidence}%\n\nSummary: ${a.summary.weeklySummary}\nImprovements: ${a.summary.improvements}\nConcerns: ${a.summary.concerns}\nCoach Priority: ${a.summary.priority}\n\nCoach Draft Response:\n${document.getElementById("draftBox").value}`;
+  navigator.clipboard?.writeText(text);
+  alert("Report copied to clipboard.");
+}
+function emailCoach() {
+  const a = state.analysis;
+  const subject = encodeURIComponent(`FUME report — ${a.client}`);
+  const body = encodeURIComponent(`Health Score: ${a.healthScore}/100\nRisk: ${a.overallRisk}\n\n${a.summary.weeklySummary}\n\nDraft response:\n${document.getElementById("draftBox").value}`);
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+</script>
+</body>
+</html>
