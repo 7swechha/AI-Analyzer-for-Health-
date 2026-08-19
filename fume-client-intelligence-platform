@@ -1,112 +1,85 @@
-# FUME – AI Client Intelligence Platform
+# 🤖 AI Health Analyzer
 
-## Overview
+### AI-Powered Conversation Analysis & Health Insights
 
-FUME is an AI-powered client intelligence platform that analyzes unstructured client conversations and converts them into structured, evidence-backed health insights.
-
-The platform is designed for health coaches, wellness professionals, and care teams who need to quickly understand client progress without manually reviewing every message.
-
----
-
-## Features
-
-- Upload conversations (.txt, .csv)
-- AI-powered conversation analysis
-- Overall Health Score
-- Risk Detection
-- Sleep Analysis
-- Hydration Analysis
-- Nutrition Tracking
-- Stress Monitoring
-- Exercise Tracking
-- Mood Detection
-- Medication Adherence
-- Goal Progress Tracking
-- Client Timeline
-- Evidence-backed insights
-- Confidence score for every prediction
-- AI-generated coach response
-- Human review workflow
-- JSON Export
-- PDF Report Export
-- Email Coach functionality
+AI Health Analyzer is a web-based application that analyzes client-coach
+conversations and presents AI-powered insights through an interactive
+dashboard, visualizations, and summaries.
 
 ---
 
-## AI Workflow
+## 📸 Preview
 
-1. Upload conversation
-2. Parse conversation
-3. Extract health-related information
-4. Classify evidence
-5. Detect health risks
-6. Generate confidence score
-7. Produce structured dashboard
-8. Generate coach response
-9. Export report
+![AI Health Analyzer Preview](screenshots/homepage.png)
 
 ---
 
-## Evidence Categories
+## ✨ Overview
 
-The system distinguishes between:
+AI Health Analyzer explores how Artificial Intelligence, data analysis,
+and web development can be combined to transform conversation data into
+structured and easy-to-understand insights.
 
-- Confirmed Facts
-- Client Reported Information
-- AI Inference
-- Missing Information
-
-This helps reduce hallucinations and improves transparency.
+The application processes conversation information and presents the
+resulting insights through an interactive and visually engaging interface.
 
 ---
 
-## Technology Stack
+## 🚀 Features
 
-- HTML5
-- CSS3
-- JavaScript
-- AI Prompt Engineering
-- JSON
-- Responsive UI
-
----
-
-## Hallucination Prevention
-
-- Every insight is linked to supporting evidence.
-- Confidence scores are displayed.
-- Unsupported claims are avoided.
-- Human review is included before taking action.
+- 🤖 AI-powered conversation analysis
+- 📊 Interactive data visualization
+- 📈 Health-related insights and indicators
+- 📝 Automated summaries
+- 📋 Structured analysis of conversation data
+- 🖥️ Interactive dashboard
+- 📱 Responsive user interface
+- 🔄 Frontend and backend integration
 
 ---
 
-## Future Improvements
+## 📸 Screenshots
 
-- Real LLM Integration (GPT / Claude)
-- Multi-client dashboard
-- Authentication
-- Real-time chat analysis
-- Voice transcription
-- Trend analytics
-- EHR integration
-- Team collaboration
+### 🏠 Main Interface
 
----
+![Main Interface](screenshots/homepage.png)
 
-## Screenshots
+### 📊 Analysis Dashboard
 
-(Add dashboard screenshots here.)
+![Dashboard](screenshots/dashboard.png)
+
+### 📈 Analysis Results
+
+![Analysis Results](screenshots/results.png)
 
 ---
 
-## Project Status
+## 🧠 How AI Is Used
 
-Prototype / Internship Assignment
+The application uses AI-based analysis to process client-coach
+conversation data and generate structured insights.
+
+The generated information is then presented through visualizations,
+indicators, and summaries to make the results easier to understand.
 
 ---
+
+## 🔄 Application Workflow
+
+```text
+User Input
+    ↓
+Conversation Data
+    ↓
+AI / Data Analysis
+    ↓
+Structured Insights
+    ↓
+Visualizations & Dashboard
+    ↓
+Summary & Results
 
 ## Author
 
 **Swechha Sinha**
-
-Artificial Intelligence & Machine Learning Student
+Web Developer/Artificial Intelligence & Machine Learning Student
